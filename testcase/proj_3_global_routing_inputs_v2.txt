@@ -1,0 +1,50 @@
+# global routing inputs
+# (first character in a line means comment)
+# routing_layers N  layer_name  its_preferred_direction // number of routing layers
+# Gcell_grid   number_of_Gcell_column   number_of_Gcell_row
+# GC (Gcell)  column_index  row_index  L (M1 left_edge_capacity  M3 edge_capacity)  R right_edge_capacity B bottom_edge_capacity  T top_edge_capacity
+# net_name  pin_at_Gcell ( x1  y1 )   ( x2  y2 )   ( x3  y3 )
+routing_layers 3  M1 horizontal  M2 vertical  M3 horizontal
+Gcell_grid  5 4 
+Gcell
+GC 0 0  L (M1 0  M3 0)  R (M1 1  M3 3)  B (M2 0)  T (M2 3)  
+GC 0 1  L (M1 0  M3 0)  R (M1 1  M3 3)  B (M2 3)  T (M2 3)
+GC 0 2  L (M1 0  M3 0)  R (M1 1 M3  3)  B (M2 3)  T (M2 3)
+GC 0 3  L (M1 0  M3 0)  R (M1 1 M3 3)  B (M2 3)   T (M2 0)
+GC 1 0  L (M1 1  M3 3)  R (M1 1 M3 3)  B (M2 0)   T (M2 3)
+GC 1 1  L (M1 1  M3 3)  R (M1 1 M3 3)  B (M2 3)  T(M2 3)
+GC 1 2  L (M1 1  M3 3)  R (M1 1 M3 3) B (M2 3)  T (M2 3)
+GC 1 3  L (M1 1 M3 3)  R (M1 1 M3 3)  B (M2 3)  T (M2 0)
+GC 2 0  L (M1 1 M3 3) R (M1 1 M3 3)  B (M2 0)  T (M2 3)
+GC 2 1  L (M1 1  M3 3)  R (M1 1 M3 3)  B (M2 3)  T(M2 3) 
+GC 2 2  L (M1 1  M3 3)  R (M1 1 M3 3)  B (M2 3)  T(M2 3) 
+GC 2 3  L (M1 1  M3 3)  R (M1 1 M3 3)  B (M2 3)  T(M2 0)
+GC 3 0  L (M1 1  M3 3)  R (M1 1 M3 3)  B (M2 0)  T(M2 3) 
+GC 3 1  L (M1 1  M3 3)  R (M1 1 M3 3)  B (M2 3)  T(M2 3) 
+GC 3 2  L (M1 1  M3 3)  R (M1 1 M3 3)  B (M2 3)  T(M2 3)  
+GC 3 3  L (M1 1  M3 3)  R (M1 1 M3 3)  B (M2 3)  T(M2 0) 
+GC 4 0  L (M1 1  M3 3)  R (M1 0 M3 0)  B (M2 0)  T(M2 3) 
+GC 4 1  L (M1 1  M3 3)  R (M1 0 M3 0)  B (M2 3)  T(M2 3) 
+GC 4 2  L (M1 1  M3 3)  R (M1 0 M3 0)  B (M2 3)  T(M2 3) 
+GC 4 3  L (M1 1  M3 3)  R (M1 0 M3 0)  B (M2 3)  T(M2 0) 
+end_of_Gcell
+
+nets
+N1  (0 0)  (1 0) (2 2)
+N2  (0 1)  (2 1) (4 1) (4 0) (1 2)
+N3  (0 2)  (2 0) (3 1) (4 1)
+N4  (0 3)  (2 1) (3 2)
+N5  (1 3)  (2 2)  (3 3)
+N6  (2 1) (4 2) 
+N7  (3 3) (3 0) (4 1)
+N8  (3 2) (1 1) (2 0)
+N9  (4 3) (2 2) (2 1) (0 2)
+N10 (2 3) (3 1)
+N11 (4 3) (2 2) (4 0)
+N12 (0 0) (4 3)
+N13 (4 0) (0 3)
+N14 (1 0) (4 3) (0 3)
+N15 (0 1) (3 3) (4 0)
+N16 (1 3) (3 0) (4 2) (0 1)
+
+end_of_nets

@@ -1,0 +1,179 @@
+[FLUTE] Net N1, degree = 3, FLUTE length = 4
+Branches:
+  branch[0] = (0, 0), neighbor = 3
+  branch[1] = (1, 0), neighbor = 3
+  branch[2] = (2, 2), neighbor = 3
+  branch[3] = (1, 0), neighbor = 3
+[FLUTE] Net N2, degree = 5, FLUTE length = 6
+Branches:
+  branch[0] = (4, 0), neighbor = 7
+  branch[1] = (2, 1), neighbor = 6
+  branch[2] = (0, 1), neighbor = 5
+  branch[3] = (4, 1), neighbor = 7
+  branch[4] = (1, 2), neighbor = 5
+  branch[5] = (1, 1), neighbor = 6
+  branch[6] = (2, 1), neighbor = 7
+  branch[7] = (4, 1), neighbor = 7
+[FLUTE] Net N3, degree = 4, FLUTE length = 6
+Branches:
+  branch[0] = (2, 0), neighbor = 5
+  branch[1] = (3, 1), neighbor = 4
+  branch[2] = (4, 1), neighbor = 4
+  branch[3] = (0, 2), neighbor = 5
+  branch[4] = (3, 1), neighbor = 5
+  branch[5] = (2, 1), neighbor = 5
+[FLUTE] Net N4, degree = 3, FLUTE length = 5
+Branches:
+  branch[0] = (2, 1), neighbor = 3
+  branch[1] = (3, 2), neighbor = 3
+  branch[2] = (0, 3), neighbor = 3
+  branch[3] = (2, 2), neighbor = 3
+[FLUTE] Net N5, degree = 3, FLUTE length = 3
+Branches:
+  branch[0] = (2, 2), neighbor = 3
+  branch[1] = (1, 3), neighbor = 3
+  branch[2] = (3, 3), neighbor = 3
+  branch[3] = (2, 3), neighbor = 3
+[FLUTE] Net N6, degree = 2, FLUTE length = 3
+Branches:
+  branch[0] = (2, 1), neighbor = 1
+  branch[1] = (4, 2), neighbor = 1
+[FLUTE] Net N7, degree = 3, FLUTE length = 4
+Branches:
+  branch[0] = (3, 0), neighbor = 3
+  branch[1] = (4, 1), neighbor = 3
+  branch[2] = (3, 3), neighbor = 3
+  branch[3] = (3, 1), neighbor = 3
+[FLUTE] Net N8, degree = 3, FLUTE length = 4
+Branches:
+  branch[0] = (2, 0), neighbor = 3
+  branch[1] = (1, 1), neighbor = 3
+  branch[2] = (3, 2), neighbor = 3
+  branch[3] = (2, 1), neighbor = 3
+[FLUTE] Net N9, degree = 4, FLUTE length = 6
+Branches:
+  branch[0] = (2, 1), neighbor = 4
+  branch[1] = (2, 2), neighbor = 4
+  branch[2] = (0, 2), neighbor = 5
+  branch[3] = (4, 3), neighbor = 5
+  branch[4] = (2, 2), neighbor = 5
+  branch[5] = (2, 2), neighbor = 5
+[FLUTE] Net N10, degree = 2, FLUTE length = 3
+Branches:
+  branch[0] = (2, 3), neighbor = 1
+  branch[1] = (3, 1), neighbor = 1
+[FLUTE] Net N11, degree = 3, FLUTE length = 5
+Branches:
+  branch[0] = (4, 0), neighbor = 3
+  branch[1] = (2, 2), neighbor = 3
+  branch[2] = (4, 3), neighbor = 3
+  branch[3] = (4, 2), neighbor = 3
+[FLUTE] Net N12, degree = 2, FLUTE length = 7
+Branches:
+  branch[0] = (0, 0), neighbor = 1
+  branch[1] = (4, 3), neighbor = 1
+[FLUTE] Net N13, degree = 2, FLUTE length = 7
+Branches:
+  branch[0] = (4, 0), neighbor = 1
+  branch[1] = (0, 3), neighbor = 1
+[FLUTE] Net N14, degree = 3, FLUTE length = 7
+Branches:
+  branch[0] = (1, 0), neighbor = 3
+  branch[1] = (0, 3), neighbor = 3
+  branch[2] = (4, 3), neighbor = 3
+  branch[3] = (1, 3), neighbor = 3
+[FLUTE] Net N15, degree = 3, FLUTE length = 7
+Branches:
+  branch[0] = (4, 0), neighbor = 3
+  branch[1] = (0, 1), neighbor = 3
+  branch[2] = (3, 3), neighbor = 3
+  branch[3] = (3, 1), neighbor = 3
+[FLUTE] Net N16, degree = 4, FLUTE length = 8
+Branches:
+  branch[0] = (3, 0), neighbor = 4
+  branch[1] = (0, 1), neighbor = 5
+  branch[2] = (4, 2), neighbor = 4
+  branch[3] = (1, 3), neighbor = 5
+  branch[4] = (3, 1), neighbor = 5
+  branch[5] = (1, 1), neighbor = 5
+[Router] FLUTE routing results:
+  Net N1:
+    Path: (0,0) (1,0) 
+    Path: (2,2) (1,2) (1,1) (1,0) 
+
+  Net N2:
+    Path: (4,0) (4,1) 
+    Path: (0,1) (1,1) 
+    Path: (1,2) (1,1) 
+    Path: (1,1) (2,1) 
+    Path: (2,1) (3,1) (4,1) 
+
+  Net N3:
+    Path: (2,0) (2,1) 
+    Path: (4,1) (3,1) 
+    Path: (0,2) (1,2) (2,2) (2,1) 
+    Path: (3,1) (2,1) 
+
+  Net N4:
+    Path: (2,1) (2,2) 
+    Path: (3,2) (2,2) 
+    Path: (0,3) (1,3) (2,3) (2,2) 
+
+  Net N5:
+    Path: (2,2) (2,3) 
+    Path: (1,3) (2,3) 
+    Path: (3,3) (2,3) 
+
+  Net N6:
+    Path: (2,1) (3,1) (4,1) (4,2) 
+
+  Net N7:
+    Path: (3,0) (3,1) 
+    Path: (4,1) (3,1) 
+    Path: (3,3) (3,2) (3,1) 
+
+  Net N8:
+    Path: (2,0) (2,1) 
+    Path: (1,1) (2,1) 
+    Path: (3,2) (2,2) (2,1) 
+
+  Net N9:
+    Path: (2,1) (2,2) 
+    Path: (0,2) (1,2) (2,2) 
+    Path: (4,3) (4,2) (3,2) (2,2) 
+
+  Net N10:
+    Path: (2,3) (3,3) (3,2) (3,1) 
+
+  Net N11:
+    Path: (4,0) (4,1) (4,2) 
+    Path: (2,2) (3,2) (4,2) 
+    Path: (4,3) (4,2) 
+
+  Net N12:
+    Path: (0,0) (0,1) (0,2) (0,3) (1,3) (2,3) (3,3) (4,3) 
+
+  Net N13:
+    Path: (4,0) (3,0) (2,0) (1,0) (0,0) (0,1) (0,2) (0,3) 
+
+  Net N14:
+    Path: (1,0) (1,1) (1,2) (1,3) 
+    Path: (0,3) (1,3) 
+    Path: (4,3) (3,3) (2,3) (1,3) 
+
+  Net N15:
+    Path: (4,0) (3,0) (3,1) 
+    Path: (0,1) (1,1) (2,1) (3,1) 
+    Path: (3,3) (3,2) (3,1) 
+
+  Net N16:
+    Path: (3,0) (3,1) 
+    Path: (0,1) (1,1) 
+    Path: (4,2) (3,2) (3,1) 
+    Path: (1,3) (1,2) (1,1) 
+    Path: (3,1) (2,1) (1,1) 
+
+
+Total wirelength = 85
+Total overflow = 4
+[Router] Finished routing nets by FLUTE.
