@@ -444,7 +444,7 @@ class VisualizerApp:
         elif ratio == 1.0:
             return '#EA7317' # Orange
         else:
-            return '#931621' # Dark Red
+            return '#FF0000' # Red
 
     def draw_congestion_plot(self):
         max_x, max_y = self.cong_grid
@@ -501,7 +501,7 @@ class VisualizerApp:
             mpatches.Patch(color='#151E3F', label='Empty (Usage=0)'),
             mpatches.Patch(color='#FEC601', label='Safe (Usage < Cap)'),
             mpatches.Patch(color='#EA7317', label='Full (Usage == Cap)'),
-            mpatches.Patch(color='#931621', label='Overflow (Usage > Cap)'),
+            mpatches.Patch(color='#FF0000', label='Overflow (Usage > Cap)'),
             mpatches.Patch(facecolor='none', edgecolor='gray', linestyle='--', label='No Capacity (Cap=0)')
         ]
         
