@@ -1,12 +1,12 @@
 # Simple Global Router
 
-This project is a C++ global router for project 3 of Design Automation course. The flow is:
+This project is a C++ global router for project3 of Design Automation course. The flow is:
 
 1. Parse the routing benchmark
-2. Build edge capacities from the `Gcell` section
-3. Generate an initial routing solution with FLUTE
-4. Apply rip-up and reroute to reduce overflow
-5. Write the final routing result to an output file
+2. Generate an initial routing solution with FLUTE
+3. Apply rip-up and reroute to reduce overflow
+4. Layer assignment
+5. Write the final routing result to output file
 
 The current implementation focuses on a clean end-to-end routing flow and uses a history-based cost during rerouting.
 
@@ -22,6 +22,9 @@ The current implementation focuses on a clean end-to-end routing flow and uses a
 │   ├── Parser/
 │   ├── Router/
 │   └── OutputWriter/
+├── scripts/
+│   └── visualizer.py
+├── docs/
 ├── testcase/
 ├── output/
 ├── third_party/
@@ -95,13 +98,16 @@ Usage:
 
 ```bash
 cd build
-./main <input txt file> <output txt file>
+./main <input txt file> <output txt file> [-c <congestion_map.txt>]
 ```
 
 Example:
 
 ```bash
 ./main ../testcase/proj_3_global_routing_inputs_v2.txt ../output/proj_3_global_routing_outputs.txt
+
+# or adding congestion map using '-c'
+./main ../testcase/proj_3_global_routing_inputs_v2.txt ../output/proj_3_global_routing_outputs.txt -c ../output/congestion_map.txt
 ```
 
 The program prints progress messages and a timer report for:
@@ -110,6 +116,29 @@ The program prints progress messages and a timer report for:
 - Route
 - Output
 - Total runtime
+
+Notes:
+
+- Run the executable from the `build/` directory so the FLUTE lookup tables can be found correctly.
+- `-c <congestion_map.txt>` is optional. When provided, the router writes an extra congestion map file for later visualization.
+
+## Visualization
+
+A Python visualizer is provided in `scripts/visualizer.py` to inspect the routing results and congestion maps.
+
+```bash
+# Run the visualizer with both routing results and the optional congestion map
+cd ~/simple_global_router
+python scripts/visualizer.py output/proj_3_global_routing_outputs.txt -c output/congestion_map.txt
+```
+
+### Routing View
+Displays the detailed routing path of each net on different layers.
+![Routing Visualizer](docs/visualizer_routing_screenshot.png)
+
+### Congestion Map View
+Provides a heatmap representation of edge capacity usage.
+![Congestion Map](docs/visualizer_congestion_screenshot.png)
 
 ## Input Format
 
@@ -133,13 +162,6 @@ nets
 end_of_nets
 ```
 
-The parser does the following:
-
-- Reads layer preferred directions
-- Reads grid size from `Gcell_grid`
-- Allocates horizontal and vertical edge arrays
-- Converts each `GC` entry into edge capacity constraints
-- Parses each net into a list of pins
 
 ## Output Format
 
@@ -154,6 +176,24 @@ After that, each net is written on one line using its routed traversal order:
 ```text
 N1 (0,0), (1,0), (2,0), (2,1)
 ```
+
+If `-c` is specified, the program also writes a plain-text congestion map. The file starts with comments describing the format, followed by grid size, layer definitions, and one record per unit edge on each layer:
+
+```text
+# GRID <cols> <rows>
+# LAYER <layer_name> <preferred_direction>
+# EDGE <layer_name> <orientation:H|V> <x1> <y1> <x2> <y2> <capacity> <usage>
+
+GRID 5 4
+LAYER M1 horizontal
+LAYER M2 vertical
+LAYER M3 horizontal
+
+EDGE M1 H 0 0 1 0 1 0
+EDGE M1 H 0 1 1 1 1 1
+EDGE M2 V 0 0 0 1 3 3
+```
+
 
 ## Data Structures
 
@@ -178,6 +218,8 @@ Each edge stores:
 - `historyCost`: accumulated congestion history used in rerouting
 - `initialized`: whether the capacity was assigned
 - `netIds`: `std::unordered_set<int>` of nets currently using the edge
+- `layerCapacity`: capacity of this edge on each routing layer
+- `layerUsage`: usage of this edge on each routing layer
 
 ### `Net`
 
@@ -243,15 +285,10 @@ During rerouting, the edge cost is based on:
 
 - current edge usage
 - edge capacity
-- `historyCost`
+- history cost
 
 This gives congested edges a growing penalty over time, encouraging later iterations to avoid repeatedly overflowing the same area.
 
-## Ordered Output Generation
-
-After routing is completed, each net is converted from branch paths into an adjacency list. A DFS traversal is then used to generate `orderedPoints`, which are written to the output file.
-
-This step makes the output easier to serialize as a single ordered point sequence per net.
 
 
 ## Example Workflow
@@ -262,4 +299,7 @@ cd build
 cmake ..
 make
 ./main ../testcase/proj_3_global_routing_inputs_v2.txt ../output/proj_3_global_routing_outputs.txt
+
+# or adding congestion map using '-c'
+./main ../testcase/proj_3_global_routing_inputs_v2.txt ../output/proj_3_global_routing_outputs_v2.txt -c ../output/congestion_map.txt
 ```

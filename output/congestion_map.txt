@@ -1,0 +1,108 @@
+# Congestion map format
+# GRID <cols> <rows>
+# LAYER <layer_name> <preferred_direction>
+# EDGE <layer_name> <orientation:H|V> <x1> <y1> <x2> <y2> <capacity> <usage>
+#
+# Notes:
+# 1. Each EDGE line describes one unit edge on one routing layer.
+# 2. capacity/usage here are per-layer values, which are enough for later visualization.
+# 3. Horizontal edges connect (x,y) to (x+1,y); vertical edges connect (x,y) to (x,y+1).
+
+GRID 5 4
+LAYER M1 horizontal
+LAYER M2 vertical
+LAYER M3 horizontal
+
+EDGE M1 H 0 0 1 0 1 0
+EDGE M1 H 0 1 1 1 1 1
+EDGE M1 H 0 2 1 2 1 1
+EDGE M1 H 0 3 1 3 1 1
+EDGE M1 H 1 0 2 0 1 0
+EDGE M1 H 1 1 2 1 1 1
+EDGE M1 H 1 2 2 2 1 1
+EDGE M1 H 1 3 2 3 1 1
+EDGE M1 H 2 0 3 0 1 1
+EDGE M1 H 2 1 3 1 1 1
+EDGE M1 H 2 2 3 2 1 1
+EDGE M1 H 2 3 3 3 1 1
+EDGE M1 H 3 0 4 0 1 1
+EDGE M1 H 3 1 4 1 1 1
+EDGE M1 H 3 2 4 2 1 1
+EDGE M1 H 3 3 4 3 1 0
+EDGE M1 V 0 0 0 1 0 0
+EDGE M1 V 0 1 0 2 0 0
+EDGE M1 V 0 2 0 3 0 0
+EDGE M1 V 1 0 1 1 0 0
+EDGE M1 V 1 1 1 2 0 0
+EDGE M1 V 1 2 1 3 0 0
+EDGE M1 V 2 0 2 1 0 0
+EDGE M1 V 2 1 2 2 0 0
+EDGE M1 V 2 2 2 3 0 0
+EDGE M1 V 3 0 3 1 0 0
+EDGE M1 V 3 1 3 2 0 0
+EDGE M1 V 3 2 3 3 0 0
+EDGE M1 V 4 0 4 1 0 0
+EDGE M1 V 4 1 4 2 0 0
+EDGE M1 V 4 2 4 3 0 0
+EDGE M2 H 0 0 1 0 0 0
+EDGE M2 H 0 1 1 1 0 0
+EDGE M2 H 0 2 1 2 0 0
+EDGE M2 H 0 3 1 3 0 0
+EDGE M2 H 1 0 2 0 0 0
+EDGE M2 H 1 1 2 1 0 0
+EDGE M2 H 1 2 2 2 0 0
+EDGE M2 H 1 3 2 3 0 0
+EDGE M2 H 2 0 3 0 0 0
+EDGE M2 H 2 1 3 1 0 0
+EDGE M2 H 2 2 3 2 0 0
+EDGE M2 H 2 3 3 3 0 0
+EDGE M2 H 3 0 4 0 0 0
+EDGE M2 H 3 1 4 1 0 0
+EDGE M2 H 3 2 4 2 0 0
+EDGE M2 H 3 3 4 3 0 0
+EDGE M2 V 0 0 0 1 3 3
+EDGE M2 V 0 1 0 2 3 3
+EDGE M2 V 0 2 0 3 3 2
+EDGE M2 V 1 0 1 1 3 1
+EDGE M2 V 1 1 1 2 3 3
+EDGE M2 V 1 2 1 3 3 2
+EDGE M2 V 2 0 2 1 3 3
+EDGE M2 V 2 1 2 2 3 3
+EDGE M2 V 2 2 2 3 3 2
+EDGE M2 V 3 0 3 1 3 3
+EDGE M2 V 3 1 3 2 3 3
+EDGE M2 V 3 2 3 3 3 3
+EDGE M2 V 4 0 4 1 3 3
+EDGE M2 V 4 1 4 2 3 3
+EDGE M2 V 4 2 4 3 3 2
+EDGE M3 H 0 0 1 0 3 2
+EDGE M3 H 0 1 1 1 3 2
+EDGE M3 H 0 2 1 2 3 2
+EDGE M3 H 0 3 1 3 3 2
+EDGE M3 H 1 0 2 0 3 1
+EDGE M3 H 1 1 2 1 3 3
+EDGE M3 H 1 2 2 2 3 3
+EDGE M3 H 1 3 2 3 3 3
+EDGE M3 H 2 0 3 0 3 2
+EDGE M3 H 2 1 3 1 3 3
+EDGE M3 H 2 2 3 2 3 3
+EDGE M3 H 2 3 3 3 3 3
+EDGE M3 H 3 0 4 0 3 3
+EDGE M3 H 3 1 4 1 3 2
+EDGE M3 H 3 2 4 2 3 3
+EDGE M3 H 3 3 4 3 3 2
+EDGE M3 V 0 0 0 1 0 0
+EDGE M3 V 0 1 0 2 0 0
+EDGE M3 V 0 2 0 3 0 0
+EDGE M3 V 1 0 1 1 0 0
+EDGE M3 V 1 1 1 2 0 0
+EDGE M3 V 1 2 1 3 0 0
+EDGE M3 V 2 0 2 1 0 0
+EDGE M3 V 2 1 2 2 0 0
+EDGE M3 V 2 2 2 3 0 0
+EDGE M3 V 3 0 3 1 0 0
+EDGE M3 V 3 1 3 2 0 0
+EDGE M3 V 3 2 3 3 0 0
+EDGE M3 V 4 0 4 1 0 0
+EDGE M3 V 4 1 4 2 0 0
+EDGE M3 V 4 2 4 3 0 0

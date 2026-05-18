@@ -70,60 +70,55 @@ bool inGrid(const RoutingDB& db, int x, int y) {
     return x >= 0 && x < db.cols && y >= 0 && y < db.rows;
 }
 
-void initEdgeLayerStorage(Edge& edge, int numLayers) {
-    edge.layerCapacity.assign(numLayers, 0);
-    edge.layerUsage.assign(numLayers, 0);
-}
-
-void setPerLayerCapacity(
+int collapseCapacityByDirection(
     const RoutingDB& db,
-    Edge& edge,
-    const std::map<std::string, int>& layerCaps,
-    bool isHorizontal
+    char dir,
+    const std::map<std::string, int>& layerCaps
 ) {
-    std::vector<int> newLayerCapacity(db.layers.size(), 0);
+    int cap = 0;
+
+    bool isHorizontalEdge = (dir == 'L' || dir == 'R');
+    bool isVerticalEdge = (dir == 'B' || dir == 'T');
 
     for (const auto& item : layerCaps) {
         const std::string& layerName = item.first;
-        int cap = item.second;
+        int layerCap = item.second;
 
-        auto it = db.layerNameToIdx.find(layerName);
-        if (it == db.layerNameToIdx.end()) {
+        auto it = db.layerPref.find(layerName);
+
+        if (it == db.layerPref.end()) {
             std::cerr << "[Warning] unknown layer: " << layerName << "\n";
             continue;
         }
 
-        newLayerCapacity[it->second] = cap;
+        const std::string& preferredDirection = it->second;
+
+        if (isHorizontalEdge && preferredDirection == "horizontal") {
+            cap += layerCap;
+        }
+
+        if (isVerticalEdge && preferredDirection == "vertical") {
+            cap += layerCap;
+        }
     }
 
+    return cap;
+}
+
+void setEdgeCapacity(Edge& edge, int cap) {
+    // If the edge is not initialized, set its capacity directly.
     if (!edge.initialized) {
-        edge.layerCapacity = newLayerCapacity;
+        edge.capacity = cap;
         edge.initialized = true;
-    } else if (edge.layerCapacity != newLayerCapacity) {
-        std::cerr << "[Warning] inconsistent per-layer capacity on edge. Use min value.\n";
-        for (int layerIdx = 0; layerIdx < static_cast<int>(edge.layerCapacity.size()); layerIdx++) {
-            edge.layerCapacity[layerIdx] = std::min(
-                edge.layerCapacity[layerIdx],
-                newLayerCapacity[layerIdx]
-            );
+    } else {
+        if (edge.capacity != cap) {
+            std::cerr << "[Warning] inconsistent edge capacity: "
+                      << edge.capacity << " vs " << cap
+                      << ". Use min value.\n";
+
+            edge.capacity = std::min(edge.capacity, cap);
         }
     }
-
-    int collapsedCapacity = 0;
-
-    for (int layerIdx = 0; layerIdx < static_cast<int>(db.layers.size()); layerIdx++) {
-        const std::string& preferredDirection = db.layers[layerIdx].preferredDirection;
-
-        if (isHorizontal && preferredDirection == "horizontal") {
-            collapsedCapacity += edge.layerCapacity[layerIdx];
-        }
-
-        if (!isHorizontal && preferredDirection == "vertical") {
-            collapsedCapacity += edge.layerCapacity[layerIdx];
-        }
-    }
-
-    edge.capacity = collapsedCapacity;
 }
 
 void assignDirectionalCapacity(
@@ -133,40 +128,31 @@ void assignDirectionalCapacity(
     char dir,
     const std::map<std::string, int>& layerCaps
 ) {
-    Edge* edge = nullptr;
-    bool isHorizontal = false;
+    int cap = collapseCapacityByDirection(db, dir, layerCaps);
 
     if (dir == 'R') {
         if (x + 1 < db.cols) {
-            edge = &db.hEdges[x][y];
-            isHorizontal = true;
+            setEdgeCapacity(db.hEdges[x][y], cap);
         }
     }
     else if (dir == 'L') {
         if (x - 1 >= 0) {
-            edge = &db.hEdges[x - 1][y];
-            isHorizontal = true;
+            setEdgeCapacity(db.hEdges[x - 1][y], cap);
         }
     }
     else if (dir == 'T') {
         if (y + 1 < db.rows) {
-            edge = &db.vEdges[x][y];
+            setEdgeCapacity(db.vEdges[x][y], cap);
         }
     }
     else if (dir == 'B') {
         if (y - 1 >= 0) {
-            edge = &db.vEdges[x][y - 1];
+            setEdgeCapacity(db.vEdges[x][y - 1], cap);
         }
     }
     else {
         throw std::runtime_error("Unknown direction in GC line");
     }
-
-    if (edge == nullptr) {
-        return;
-    }
-
-    setPerLayerCapacity(db, *edge, layerCaps, isHorizontal);
 }
 
 void parseRoutingLayers(RoutingDB& db, const std::vector<std::string>& tok) {
@@ -180,7 +166,6 @@ void parseRoutingLayers(RoutingDB& db, const std::vector<std::string>& tok) {
 
     db.layers.clear();
     db.layerPref.clear();
-    db.layerNameToIdx.clear();
 
     // Each layer is defined by a pair of tokens: layer name and preferred direction
     for (int i = 0; i < numLayers; i++) {
@@ -194,7 +179,6 @@ void parseRoutingLayers(RoutingDB& db, const std::vector<std::string>& tok) {
 
         db.layers.push_back(layer);
         db.layerPref[layer.name] = layer.preferredDirection;
-        db.layerNameToIdx[layer.name] = i;
     }
 }
 
@@ -216,19 +200,6 @@ void parseGCellGrid(RoutingDB& db, const std::vector<std::string>& tok) {
 
     // vEdges[x][y] = edge between (x, y) and (x, y+1)
     db.vEdges.assign(db.cols, std::vector<Edge>(db.rows - 1));
-
-    for (int x = 0; x < db.cols - 1; x++) {
-        for (int y = 0; y < db.rows; y++) {
-            initEdgeLayerStorage(db.hEdges[x][y], static_cast<int>(db.layers.size()));
-        }
-    }
-
-    for (int x = 0; x < db.cols; x++) {
-        for (int y = 0; y < db.rows - 1; y++) {
-            initEdgeLayerStorage(db.vEdges[x][y], static_cast<int>(db.layers.size()));
-        }
-    }
-
 }
 
 void parseGCellLine(RoutingDB& db, const std::vector<std::string>& tok) {
@@ -329,7 +300,6 @@ void parseNetLine(RoutingDB& db, const std::vector<std::string>& tok, int netId)
     db.nets.push_back(net);
 }
 
-
 } // namespace
 
 RoutingDB parseInputFile(const std::string& filename) {
@@ -342,118 +312,69 @@ RoutingDB parseInputFile(const std::string& filename) {
 
     RoutingDB db;
     Section section = Section::None;
-
     std::string line;
-    int netIdCounter = 0;
+    int netId = 0;
 
     while (std::getline(fin, line)) {
-        line = trim(stripComment(line));
+        line = stripComment(line);
+        line = trim(line);
 
         if (line.empty()) {
             continue;
         }
 
         std::vector<std::string> tok = tokenize(line);
-
         if (tok.empty()) {
             continue;
         }
 
-        // Parse different sections based on the first token
         if (tok[0] == "routing_layers") {
             parseRoutingLayers(db, tok);
+            continue;
         }
-        else if (tok[0] == "Gcell_grid") {
+
+        if (tok[0] == "Gcell_grid") {
             parseGCellGrid(db, tok);
+            continue;
         }
-        else if (tok[0] == "Gcell") {
+
+        if (tok[0] == "Gcell") {
             section = Section::GCell;
+            continue;
         }
-        else if (tok[0] == "end_of_Gcell") {
+
+        if (tok[0] == "end_of_Gcell") {
             section = Section::None;
+            continue;
         }
-        else if (tok[0] == "nets") {
+
+        if (tok[0] == "nets") {
             section = Section::Nets;
+            continue;
         }
-        else if (tok[0] == "end_of_nets") {
+
+        if (tok[0] == "end_of_nets") {
             section = Section::None;
-            break;
+            continue;
         }
-        else if (section == Section::GCell) {
+
+        if (section == Section::GCell) {
             parseGCellLine(db, tok);
-        }
-        else if (section == Section::Nets) {
-            parseNetLine(db, tok, netIdCounter++);
-        }
-        else {
-            std::cerr << "[Warning] ignore unknown line: " << line << "\n";
+        } else if (section == Section::Nets) {
+            parseNetLine(db, tok, netId);
+            netId++;
         }
     }
 
-    std::cout << "[Parser] Finished parsing input file.\n";
-    std::cout << "\n";
-    return db;
-}
-
-void testParseInputFile(const RoutingDB& db) {
-    std::cout << "================================\n";
-    std::cout << "Test parseInputFile\n";
-    // Print parsed data for verification
+    std::cout << "[Parser] Parsing completed.\n";
     std::cout << "Grid: " << db.cols << " x " << db.rows << "\n";
     std::cout << "Layers: " << db.layers.size() << "\n";
-    std::cout << "Layers details:\n";
+
     for (const auto& layer : db.layers) {
         std::cout << "  " << layer.name << " (preferred direction: " << layer.preferredDirection << ")\n";
     }
 
-    std::cout << "\n";
-    std::cout << "Edges with capacity:\n";
-    for (int x = 0; x < db.cols; x++) {
-        for (int y = 0; y < db.rows; y++) {
-            if (x < db.cols - 1) {
-                const Edge& edge = db.hEdges[x][y];
-                if (edge.initialized) {
-                    std::cout << "  HEdge (" << x << "," << y << ") - (" << x + 1 << "," << y << "): capacity = " << edge.capacity << "\n";
-                }
-            }
-            if (y < db.rows - 1) {
-                const Edge& edge = db.vEdges[x][y];
-                if (edge.initialized) {
-                    std::cout << "  VEdge (" << x << "," << y << ") - (" << x << "," << y + 1 << "): capacity = " << edge.capacity << "\n";
-                }
-            }
-        }
-    }
+    std::cout << "Nets: " << db.nets.size() << "\n\n";
 
-    std::cout << "\n";
-    std::cout << "Total HEdges = " << (db.cols - 1) * db.rows << "\n";
-    std::cout << "Total VEdges = " << db.cols * (db.rows - 1) << "\n";
-    for (int x = 0; x < db.cols - 1; x++) {
-        for (int y = 0; y < db.rows; y++) {
-            if (!db.hEdges[x][y].initialized) {
-                std::cerr << "[Warning] HEdge not initialized: "
-                        << x << "," << y << "\n";
-            }
-        }
-    }
-
-    for (int x = 0; x < db.cols; x++) {
-        for (int y = 0; y < db.rows - 1; y++) {
-            if (!db.vEdges[x][y].initialized) {
-                std::cerr << "[Warning] VEdge not initialized: "
-                        << x << "," << y << "\n";
-            }
-        }
-    }
-    std::cout << "\n";
-    std::cout << "Nets: " << db.nets.size() << "\n";
-    std::cout << "Nets details:\n";
-    for (const auto& net : db.nets) {
-        std::cout << "  " << net.name << ": ";
-        for (const auto& pin : net.pins) {
-            std::cout << "(" << pin.x << "," << pin.y << ") ";
-        }
-        std::cout << "\n";
-    }
-    std::cout << "================================\n";
+    return db;
 }

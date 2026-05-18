@@ -18,6 +18,7 @@ add_executable(main
     src/Parser/Parser.cpp
     src/Router/FluteRouter.cpp
     src/Router/Router.cpp
+    src/Router/LayerAssignment.cpp
     src/OutputWriter/OutputWriter.cpp
 )
 

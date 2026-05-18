@@ -5,6 +5,7 @@
 #include "Parser/Parser.hpp"
 #include "Router/FluteRouter.hpp"
 #include "Router/Router.hpp"
+#include "Router/LayerAssignment.hpp"
 #include "OutputWriter/OutputWriter.hpp"
 
 int main(int argc, char* argv[]) {
@@ -12,13 +13,17 @@ int main(int argc, char* argv[]) {
     timer.startTotalTimer();
     ArgumentParser argParser;
     if (!argParser.argparse(argc, argv)) {
-        return 1;  // 解析失敗，結束程式
+        return 1;
     }
 
     std::cout << "================================" << std::endl;
     std::cout << "Project Name: Simple Global Router" << std::endl;
     std::cout << "Input File: " << argParser.inputFile << "\n";
     std::cout << "Output File: " << argParser.outputFile << "\n";
+    if (!argParser.congestionMapFile.empty()) {
+        std::cout << "Congestion Map File: " << argParser.congestionMapFile << "\n";
+    }
+    std::cout << "Group: 6\n";
     std::cout << "================================" << std::endl;
     std::cout << "\n\n";
 
@@ -36,11 +41,15 @@ int main(int argc, char* argv[]) {
         routeAllNetsByFlute(db);
         int maxIterations = 10;
         RipupAndReroute(db, maxIterations);
+        assignLayers(db);
         timer.stopTimer("Route");
 
         // Output results
         timer.startTimer("Output");
         writeRoutingOutput(db, argParser.outputFile);
+        if (!argParser.congestionMapFile.empty()) {
+            writeCongestionMap(db, argParser.congestionMapFile);
+        }
         timer.stopTimer("Output");
     }
     catch (const std::exception& e) {
@@ -52,5 +61,9 @@ int main(int argc, char* argv[]) {
 
     timer.stopTotalTimer();
     timer.printAllTimers();
+    std::cout << "\n[Main] Output file written to: " << argParser.outputFile << std::endl;
+    if (!argParser.congestionMapFile.empty()) {
+        std::cout << "[Main] Congestion map written to: " << argParser.congestionMapFile << std::endl;
+    }
     return 0;
 }

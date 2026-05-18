@@ -33,6 +33,12 @@ struct Pin : public Point {
     Pin(int x = 0, int y = 0) : Point(x, y) {}
 };
 
+struct LayerAssignedSegment {
+    std::string layerName;
+    Point start;
+    Point end;
+};
+
 struct Net {
     int id; // Unique identifier for the net
     std::string name;
@@ -43,6 +49,9 @@ struct Net {
 
     // traversal order
     std::vector<Point> orderedPoints;
+
+    // layer assignment result after 2D routing
+    std::vector<LayerAssignedSegment> layerAssignedSegments;
 };
 
 struct Edge {
