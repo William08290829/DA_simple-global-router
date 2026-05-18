@@ -30,3 +30,7 @@ Makefile
 # OS files
 .DS_Store
 Thumbs.db
+
+# test files
+testcase/N2_compare_input.txt
+output/N2_compare_output.txt

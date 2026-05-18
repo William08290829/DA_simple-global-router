@@ -167,8 +167,37 @@ def create_congestion_icon():
             img.put(colors[r][c], to=(x1, y1, x1+5, y1+5))
     return img
 
+def parse_original_input_file(filepath):
+    pins = defaultdict(list)
+    if not filepath:
+        return pins
+        
+    try:
+        with open(filepath, 'r') as f:
+            in_nets = False
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                if line == 'nets':
+                    in_nets = True
+                elif line == 'end_of_nets':
+                    in_nets = False
+                elif in_nets:
+                    parts = line.split()
+                    if not parts: continue
+                    net_name = parts[0]
+                    # Parse tuples like (x y)
+                    matches = re.findall(r'\((\d+)\s+(\d+)\)', line)
+                    for m in matches:
+                        pins[net_name].append((int(m[0]), int(m[1])))
+    except Exception as e:
+        print(f"Error reading original input file: {e}")
+        
+    return pins
+
 class VisualizerApp:
-    def __init__(self, root, grid_size, nets, cong_grid, cong_layers, cong_edges, has_congestion):
+    def __init__(self, root, grid_size, nets, cong_grid, cong_layers, cong_edges, has_congestion, pins):
         self.root = root
         self.root.title("Global Routing & Congestion Visualizer")
         
@@ -176,6 +205,7 @@ class VisualizerApp:
         self.grid_size = grid_size
         self.nets = nets
         self.net_names = list(self.nets.keys())
+        self.pins = pins
         
         # Congestion Data
         self.cong_grid = cong_grid if has_congestion else grid_size
@@ -374,15 +404,17 @@ class VisualizerApp:
                 else:
                     self.ax.plot([x1, x2], [y1, y2], color=color, linewidth=10, zorder=2, alpha=0.75)
                 
+            net_pins = self.pins.get(net_name, [])
+            
+            # 畫 Via (如果有大於一層通過該點，且該點不是 Pin)
             for pt, layers in pt_layers.items():
                 x, y = pt
-                deg = pt_degree[pt]
-                
-                if deg == 1:
-                    self.ax.plot(x, y, marker='o', color='#DDDDDD', markeredgecolor='black', markersize=10, zorder=3)
-                else:
-                    if len(layers) > 1:
-                        self.ax.plot(x, y, marker='s', color='black', markersize=6, zorder=4)
+                if len(layers) > 1 and pt not in net_pins:
+                    self.ax.plot(x, y, marker='s', color='black', markersize=6, zorder=4)
+                    
+            # 畫 Pin (嚴格依照 input_file)
+            for pt in net_pins:
+                self.ax.plot(pt[0], pt[1], marker='o', markerfacecolor='#DDDDDD', markeredgecolor='black', markersize=10, zorder=5)
 
         legend_elements = []
         for layer in sorted(layers_used):
@@ -482,17 +514,19 @@ class VisualizerApp:
 
 def main():
     parser = argparse.ArgumentParser(description="Visualize Global Routing Output & Congestion Map")
-    parser.add_argument("input_file", help="Path to the global routing output file")
+    parser.add_argument("input_file", help="Path to the original global routing input file (for exact pins)")
+    parser.add_argument("routing_output", help="Path to the global routing output file")
     parser.add_argument("-c", "--congestion_map", help="Path to the congestion map file (optional)", default=None)
     args = parser.parse_args()
     
-    grid_size, nets = parse_routing_file(args.input_file)
+    grid_size, nets = parse_routing_file(args.routing_output)
+    pins = parse_original_input_file(args.input_file)
     
     has_congestion = bool(args.congestion_map)
     cong_grid, cong_layers, cong_edges = parse_congestion_file(args.congestion_map)
     
     root = tk.Tk()
-    app = VisualizerApp(root, grid_size, nets, cong_grid, cong_layers, cong_edges, has_congestion)
+    app = VisualizerApp(root, grid_size, nets, cong_grid, cong_layers, cong_edges, has_congestion, pins)
     
     # 設定視窗關閉時結束程式
     root.protocol("WM_DELETE_WINDOW", root.quit)

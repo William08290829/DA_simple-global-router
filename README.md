@@ -127,9 +127,8 @@ Notes:
 A Python visualizer is provided in `scripts/visualizer.py` to inspect the routing results and congestion maps.
 
 ```bash
-# Run the visualizer with both routing results and the optional congestion map
-cd ~/simple_global_router
-python scripts/visualizer.py output/proj_3_global_routing_outputs.txt -c output/congestion_map.txt
+# Run the visualizer with the input file, routing output, and the optional congestion map
+python scripts/visualizer.py testcase/proj_3_global_routing_inputs_v2.txt output/proj_3_global_routing_outputs.txt -c output/congestion_map.txt
 ```
 
 ### Routing View
