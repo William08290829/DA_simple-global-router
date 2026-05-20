@@ -44,7 +44,7 @@ Important files:
 ## Requirements
 
 - CMake >= 3.10
-- A C++17 compiler
+- A C++11 compiler
 - `make`
 
 This project also includes the FLUTE source and lookup tables under `third_party/flute/`, so no extra external installation is needed.
@@ -89,7 +89,7 @@ After building, the executable will be:
 
 ```bash
 cd build
-build/main
+./main
 ```
 
 ## Run

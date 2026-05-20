@@ -50,7 +50,8 @@ void appendPoint(
 }
 
 void addNetToEdge(Edge& edge, int netId) {
-    auto [it, inserted] = edge.netIds.insert(netId);
+    auto insertResult = edge.netIds.insert(netId);
+    bool inserted = insertResult.second;
     if (inserted) {
         edge.usage++;
     }

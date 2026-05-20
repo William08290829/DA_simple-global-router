@@ -39,8 +39,11 @@ struct EdgeRef {
 };
 
 struct BranchCandidate {
-    int netId = -1;
-    int pathIdx = -1;
+    int netId;
+    int pathIdx;
+
+    BranchCandidate() : netId(-1), pathIdx(-1) {}
+    BranchCandidate(int netId, int pathIdx) : netId(netId), pathIdx(pathIdx) {}
 };
 
 EdgeRef getEdgeRefFromAdjPoints(const Point& a, const Point& b) {
@@ -86,7 +89,8 @@ std::vector<EdgeRef> pathToEdges(const std::vector<Point>& path) {
 }
 
 void addNetToEdge(Edge& edge, int netId) {
-    auto [it, inserted] = edge.netIds.insert(netId);
+    auto insertResult = edge.netIds.insert(netId);
+    bool inserted = insertResult.second;
     if (inserted) {
         edge.usage++;
     }
@@ -371,7 +375,9 @@ std::vector<Point> multiSourceMultiSinkDijkstra( const RoutingDB& db, const std:
     const int dy[4] = {0, 0, 1, -1};
 
     while (!pq.empty()) {
-        auto [cost, u] = pq.top();
+        std::pair<int, Point> top = pq.top();
+        int cost = top.first;
+        Point u = top.second;
         pq.pop();
 
         if (cost > dist[u.x][u.y]) {
