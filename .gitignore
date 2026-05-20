@@ -34,3 +34,4 @@ Thumbs.db
 # test files
 testcase/N2_compare_input.txt
 output/N2_compare_output.txt
+output/iter_sample

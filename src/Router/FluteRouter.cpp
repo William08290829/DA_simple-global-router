@@ -357,10 +357,10 @@ void routeOneNetByFlute(RoutingDB& db, const int netId) {
     int accuracy = 3;
     Tree tree = flute(degree, x.data(), y.data(), accuracy);
 
-    std::cout << "[FLUTE Router] Net " << net.name
-              << ", degree = " << degree
-              << ", FLUTE length = " << tree.length
-              << "\n";
+    // std::cout << "[FLUTE Router] Net " << net.name
+    //           << ", degree = " << degree
+    //           << ", FLUTE length = " << tree.length
+    //           << "\n";
 
     // output FLUTE tree structure for debugging
     // int branchCount = 2 * tree.deg - 2; // FLUTE 的 branch 數量是 2*degree - 2

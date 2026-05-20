@@ -626,6 +626,7 @@ void RipupAndReroute( RoutingDB& db, int maxIterations ) {
         overflow = computeTotalOverflow(db);
 
         std::cout << "[Router] Current overflow = " << overflow << "\n";
+        std::cout << "[Router] Current Wirelength = " << computeTotalWirelength(db) << "\n\n";
 
         iteration++;
     }
