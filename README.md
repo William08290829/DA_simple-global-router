@@ -38,6 +38,7 @@ Important files:
 - `src/Parser/Parser.cpp`: input parsing and routing database construction
 - `src/Router/FluteRouter.cpp`: initial routing based on FLUTE
 - `src/Router/Router.cpp`: rip-up and reroute
+- `src/Router/LayerAssignment.cpp`: via-aware layer assignment
 - `src/OutputWriter/OutputWriter.cpp`: final output writer
 - `include/Structure.hpp`: core data structures
 
@@ -170,11 +171,15 @@ The output file begins with the grid information:
 Gcell_grid  5 4
 ```
 
-After that, each net is written on one line using its routed traversal order:
+After that, each net is written with its layer-assigned unit segments, one segment per line:
 
 ```text
-N1 (0,0), (1,0), (2,0), (2,1)
+N1
+  M2 (0,0) (0,1)
+  M3 (0,1) (1,1)
 ```
+
+A net without any routed segment (e.g. all pins in the same Gcell) is written on one line using its traversal order.
 
 If `-c` is specified, the program also writes a plain-text congestion map. The file starts with comments describing the format, followed by grid size, layer definitions, and one record per unit edge on each layer:
 
@@ -260,23 +265,25 @@ The initial routing cost favors lower congestion through a sigmoid-like penalty:
 
 ### 3. Rip-up and Reroute
 
-`RipupAndReroute()` is used after FLUTE routing to reduce overflow.
+`RipupAndReroute()` is used after FLUTE routing to reduce overflow. It is a negotiation-based router: overflow is allowed during rerouting but penalized, and the penalty grows every iteration.
 
 The current implementation works as follows:
 
 1. Find all overflow edges
 2. Increase `historyCost` on every overflow edge
-3. Try to reroute one branch that uses an overflow edge
-4. Recompute overflow and repeat for a limited number of iterations
+3. For every overflow edge (largest overflow first), rip up and reroute nets that use it until it no longer overflows
+4. Recompute overflow, increase the present-cost factor, and repeat
+
+The loop stops when overflow reaches 0, when the best result has not improved for 30 iterations, or when the iteration limit given in `main.cpp` (200) is reached. Because a single iteration can make things worse, the best routing seen so far is kept and restored at the end.
 
 Important details:
 
-- A branch candidate is selected from the nets using a target overflow edge.
-- Candidate selection is randomized from all paths that actually use that edge.
-- The selected old path is removed from the routing tree.
-- The remaining net is split into two connected components.
-- A multi-source multi-sink Dijkstra search reconnects the two components.
-- If no legal replacement path is found, the old path is restored.
+- Before rip-up, each net's routing is split into chains: every path in `routedPaths` runs from one key node (a pin or a branching point) to the next, and all nodes in between have exactly two neighbors. Dangling wires and pin-less parts are removed.
+- Because of this, removing one path always splits the net into at most two connected components.
+- Candidate nets are shuffled randomly; for each net, the chain that uses the overflow edge is removed.
+- A multi-source multi-sink Dijkstra search reconnects the two components. If both ends are still connected (or one side has no pin), the removed chain was redundant and is simply dropped.
+- If no replacement path is found (only possible when blocked by zero-capacity edges), the old path is restored.
+- After every change the net is split into chains again, because a new path may attach to the middle of another path.
 
 ### Reroute Cost Function
 
@@ -286,7 +293,31 @@ During rerouting, the edge cost is based on:
 - edge capacity
 - history cost
 
-This gives congested edges a growing penalty over time, encouraging later iterations to avoid repeatedly overflowing the same area.
+The cost of one edge is:
+
+```text
+cost = (1 + historyCost) * (1 + presentFactor * overflowIfAdded)
+```
+
+- `overflowIfAdded`: how much the edge would exceed its capacity if this net used it (0 if there is still room)
+- `presentFactor`: starts at 0.5 and is multiplied by 1.5 every iteration
+- edges with zero capacity are never used
+
+Early iterations allow nets to share congested edges cheaply; as `presentFactor` and `historyCost` grow, nets that have other choices are pushed away, and only nets with no better path stay.
+
+### 4. Layer Assignment
+
+`assignLayers()` maps every 2D unit edge to a routing layer whose preferred direction matches the edge.
+
+Nets are processed one by one in input order. For each net, a tree DP on its routing tree picks the layers that minimize, in order of priority:
+
+1. per-layer overflow
+2. number of vias
+3. congestion (usage / capacity of the chosen layer)
+
+The via count at a Gcell is `highest layer - lowest layer` among the segments that meet there. Pins are assumed to be on M1, so a pin Gcell also counts the via stack from M1.
+
+If the 2D routing still has overflow, the segment is still placed on one of the full layers (chosen by via count, then congestion) and the overflow is reported instead of stopping the program.
 
 
 
