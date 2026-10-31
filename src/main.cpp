@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
         // Route nets
         timer.startTimer("Route");
         routeAllNetsByFlute(db);
-        int maxIterations = 10;
+        int maxIterations = 200;   // 上限；overflow 歸零或連續多輪沒有進步會提早停止
         RipupAndReroute(db, maxIterations);
         assignLayers(db);
         timer.stopTimer("Route");
