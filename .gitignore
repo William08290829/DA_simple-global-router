@@ -35,3 +35,7 @@ Thumbs.db
 testcase/N2_compare_input.txt
 output/N2_compare_output.txt
 output/iter_sample
+
+# Python files
+__pycache__/
+*.pyc

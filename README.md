@@ -1,4 +1,4 @@
-# Simple Global Router
+# Simple 3D Global Router
 
 This project is a C++ global router for project3 of Design Automation course. The flow is:
 
